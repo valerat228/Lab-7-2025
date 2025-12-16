@@ -227,4 +227,71 @@ public final class TabulatedFunctions {
         //используем рефлексивный метод для создания функции указанного класса
         return createTabulatedFunction(functionClass, points);
     }
+
+    //читает табулированную функцию указанного класса из байтового потока
+    public static TabulatedFunction inputTabulatedFunction(Class<? extends TabulatedFunction> functionClass, InputStream in) throws IOException {
+        DataInputStream dis = new DataInputStream(in);
+
+        //читаем количество точек
+        int pointsCount = dis.readInt();
+        FunctionPoint[] points = new FunctionPoint[pointsCount];
+
+        //читаем все точки
+        for (int i = 0; i < pointsCount; i++) {
+            double x = dis.readDouble();
+            double y = dis.readDouble();
+            points[i] = new FunctionPoint(x, y);
+        }
+
+        //используем рефлексивный метод для создания функции указанного класса
+        return createTabulatedFunction(functionClass, points);
+    }
+
+    //читает табулированную функцию указанного класса из символьного потока
+    public static TabulatedFunction readTabulatedFunction(Class<? extends TabulatedFunction> functionClass, Reader in) throws IOException {
+        StreamTokenizer tokenizer = new StreamTokenizer(in);
+
+        // Настраиваем tokenizer для правильной работы с числами с запятыми
+        tokenizer.resetSyntax();
+        tokenizer.wordChars('0', '9'); // цифры
+        tokenizer.wordChars('.', '.'); // точка
+        tokenizer.wordChars(',', ','); // запятая
+        tokenizer.wordChars('-', '-'); // минус
+        tokenizer.wordChars('E', 'E'); // экспонента
+        tokenizer.wordChars('e', 'e'); // экспонента
+        tokenizer.whitespaceChars(' ', ' ');  // пробел
+        tokenizer.whitespaceChars('\t', '\t'); // табуляция
+        tokenizer.whitespaceChars('\n', '\n'); // новая строка
+        tokenizer.whitespaceChars('\r', '\r'); // возврат каретки
+
+        //читаем количество точек
+        if (tokenizer.nextToken() != StreamTokenizer.TT_WORD) {
+            throw new IOException("ожидалось число (количество точек)");
+        }
+        int pointsCount = Integer.parseInt(tokenizer.sval);
+
+        FunctionPoint[] points = new FunctionPoint[pointsCount];
+
+        //читаем все точки
+        for (int i = 0; i < pointsCount; i++) {
+            //читаем x
+            if (tokenizer.nextToken() != StreamTokenizer.TT_WORD) {
+                throw new IOException("ожидалось число для x точки " + i);
+            }
+            String xStr = tokenizer.sval.replace(',', '.');
+            double x = Double.parseDouble(xStr);
+
+            //читаем y
+            if (tokenizer.nextToken() != StreamTokenizer.TT_WORD) {
+                throw new IOException("ожидалось число для y точки " + i);
+            }
+            String yStr = tokenizer.sval.replace(',', '.');
+            double y = Double.parseDouble(yStr);
+
+            points[i] = new FunctionPoint(x, y);
+        }
+
+        //используем рефлексивный метод для создания функции указанного класса
+        return createTabulatedFunction(functionClass, points);
+    }
 }

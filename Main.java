@@ -112,7 +112,7 @@ public class Main {
         }
     }
 
-    public static void main(String[] args) throws InappropriateFunctionPointException {
+    public static void main(String[] args) throws IOException, InappropriateFunctionPointException {
 
         System.out.println("\n" + "=".repeat(50));
         System.out.println("=== ТЕСТЫ ДЛЯ ЛАБОРАТОРНОЙ №6 ===");
@@ -232,6 +232,26 @@ public class Main {
                     LinkedListTabulatedFunction.class, new Sin(), 0, Math.PI, 11);
             System.out.println(f.getClass());
             System.out.println(f);
+
+            //создаем и записываем тестовую функцию
+            TabulatedFunction testFunc = TabulatedFunctions.createTabulatedFunction(
+                    ArrayTabulatedFunction.class, 0, 10, 3);
+
+            //тест inputTabulatedFunction
+            ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+            TabulatedFunctions.outputTabulatedFunction(testFunc, byteOut);
+            ByteArrayInputStream byteIn = new ByteArrayInputStream(byteOut.toByteArray());
+            TabulatedFunction read1 = TabulatedFunctions.inputTabulatedFunction(
+                    LinkedListTabulatedFunction.class, byteIn);
+            System.out.println("inputTabulatedFunction: " + read1.getClass().getSimpleName());
+
+            //тест readTabulatedFunction
+            StringWriter writer = new StringWriter();
+            TabulatedFunctions.writeTabulatedFunction(testFunc, writer);
+            StringReader reader = new StringReader(writer.toString());
+            TabulatedFunction read2 = TabulatedFunctions.readTabulatedFunction(
+                    ArrayTabulatedFunction.class, reader);
+            System.out.println("readTabulatedFunction: " + read2.getClass().getSimpleName());
         }
 
             System.out.println("\n=== ВСЕ ТЕСТЫ ЗАВЕРШЕНЫ! ===");
